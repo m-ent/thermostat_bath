@@ -1,8 +1,3 @@
-def get_temp
-#  /.+: (\d+\.\d+)/.match(`sysctl dev.ow.temp.0.temperature`)[1]
-  34.0 # mock data
-end
-
 class Thermo_controller
   def initialize(temp = 36.0, interval = 10.0, kp = 0.0, ki = 0.0, kd = 0.0)
     @target = temp
@@ -12,6 +7,10 @@ class Thermo_controller
     @i_data = 0.0 # 積分値
     @kd = kd # Kd: 微分制御係数
 #    system("gpioctl -c 18 OUT")
+  end
+
+  def get_temp
+    /.+: (\d+\.\d+)/.match(`sysctl dev.ow.temp.0.temperature`)[1]
   end
 
   def calc_power(temp0, temp1)
@@ -54,8 +53,3 @@ class Thermo_controller
     end
   end
 end
-
-
-t = Thermo_controller.new(36.0, 3.0, 2.0, 0.0, 0.0)
-  #e.g.: Kp: 1.0-3.0, Ki: 0.005, Kd: 
-t.start
