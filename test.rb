@@ -2,6 +2,8 @@ require 'minitest/autorun'
 require './main'
 
 class Mock_temp
+  attr_reader :temp_list
+
   def initialize(temp_list = nil)
     @state = -1
     if temp_list
@@ -83,6 +85,25 @@ describe Thermo_controller do
         @controller.start(5)
         File.exists?(@log_file).must_equal true
         File::Stat.new(@log_file).size.wont_equal 0
+      end
+    end
+
+    it 'log を on にすると log ファイルに温度が記録されること' do
+      @controller.stub(:get_temp, @mock_temp) do
+        @controller.log(:on)
+        @controller.start(5)
+        log = ""
+        File.open(@log_file) do |f|
+          while (l = f.gets) do
+            log += "#{l.chomp} "
+          end
+        end
+        t = @mock_temp.temp_list
+        t_reg = ""
+        (1..5).each do |i|
+          t_reg += "#{t[i]}.*"
+        end
+        log.must_match Regexp.new(t_reg)
       end
     end
 
