@@ -107,12 +107,11 @@ describe Thermo_controller do
       end
     end
 
-    it 'log を off にすると log ファイルが作られ、sizeが0であること' do
+    it 'log を off にすると log ファイルが作られないこと' do
       @controller.stub(:get_temp, @mock_temp) do
         @controller.log(:off)
         @controller.start(5)
-        File.exists?(@log_file).must_equal true
-        File::Stat.new(@log_file).size.must_equal 0
+        File.exists?(@log_file).wont_equal true
       end
     end
   end

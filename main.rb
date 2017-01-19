@@ -56,16 +56,19 @@ class Thermo_controller
   def start(cycle = -1)
     temp0 = get_temp
     sleep @interval
-    File.open(@log_file, 'w') do |f|
-      loop do
-        temp1 = get_temp
-        puts temp1
-        f.puts temp1 if @log
-        put_power(calc_power(temp0, temp1))
-        temp0 = temp1
-        cycle = (cycle < 0 ? -1 : cycle - 1)
-        break if cycle == 0
+    File.open(@log_file, 'w') if @log
+    loop do
+      temp1 = get_temp
+      puts temp1
+      if @log
+        File.open(@log_file, 'a') do |f|
+          f.puts temp1 if @log
+        end
       end
+      put_power(calc_power(temp0, temp1))
+      temp0 = temp1
+      cycle = (cycle < 0 ? -1 : cycle - 1)
+      break if cycle == 0
     end
   end
 end
