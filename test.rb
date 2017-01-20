@@ -72,8 +72,8 @@ describe Thermo_controller do
 
   describe '#log' do
     before do
-      tmp, interval, kp, ki, kd = 36.0, 1.0, 1.0, 0.1, 0.01
-      @controller = Thermo_controller.new(tmp, interval, kp, ki, kd)
+      @tmp, @interval, @kp, @ki, @kd = 36.0, 1.0, 1.0, 0.1, 0.01
+      @controller = Thermo_controller.new(@tmp, @interval, @kp, @ki, @kd)
       @log_file = 'temp.log'
       File.delete(@log_file) if File.exists?(@log_file)
       @mock_temp = Mock_temp.new {}
@@ -86,6 +86,22 @@ describe Thermo_controller do
         File.exists?(@log_file).must_equal true
         File::Stat.new(@log_file).size.wont_equal 0
       end
+    end
+
+    it 'log を on にすると log ファイルの最初に条件が記録されること' do
+      @controller.stub(:get_temp, @mock_temp) do
+        @controller.log(:on)
+        @controller.start(5)
+        condition = \
+          "target: #{@tmp}, interval: #{@interval}, Kp: #{@kp}, Ki: #{@ki}, Kd: #{@kd}" 
+p condition
+        log = ""
+        File.open(@log_file) do |f|
+          log = f.gets.chomp
+        end
+        log.must_equal condition
+      end
+
     end
 
     it 'log を on にすると log ファイルに温度が記録されること' do

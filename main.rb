@@ -56,7 +56,11 @@ class Thermo_controller
   def start(cycle = -1)
     temp0 = get_temp
     sleep @interval
-    File.open(@log_file, 'w') if @log
+    if @log
+      File.open(@log_file, 'w') do |f|
+        f.puts "target: #{@target}, interval: #{@interval}, Kp: #{@kp}, Ki: #{@ki}, Kd: #{@kd}"
+      end
+    end
     loop do
       temp1 = get_temp
       puts temp1
