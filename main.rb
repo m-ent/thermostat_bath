@@ -2,26 +2,36 @@ class Thermo_controller
   def initialize(temp = 36.0, interval = 10.0, kp = 0.0, ki = 0.0, kd = 0.0)
     @log = false
     @log_file = 'temp.log'
+    @on_fly = false
     @target = temp
     @interval = interval # 測定間隔
     @kp = kp # Kp: 比例制御係数
     @ki = ki # Ki: 積分制御係数
     @i_data = 0.0 # 積分値
     @kd = kd # Kd: 微分制御係数
-#    system("gpioctl -c 18 OUT")
   end
 
   def log(mode)
     case mode
     when :on
       @log = true
-    when :on
+    else :on
       @log = false
     end
   end
 
+  def on_fly(mode)
+    case mode
+    when :on
+      @on_fly = true
+      system("gpioctl -c 18 OUT")
+    else :on
+      @on_fly = false
+    end
+  end
+
   def get_temp
-    /.+: (\d+\.\d+)/.match(`sysctl dev.ow.temp.0.temperature`)[1]
+    /.+: (\d+\.\d+)/.match(`sysctl dev.ow_temp.0.temperature`)[1]
   end
 
   def calc_power(temp0, temp1)
@@ -38,9 +48,9 @@ class Thermo_controller
   def power(state, time)
     case state
     when :on
-#      system("gpioctl 18 1")
+      system("gpioctl 18 1") if @on_fly
     when :off
-#      system("gpioctl 18 0")
+      system("gpioctl 18 0") if @on_fly
     end
     sleep time
   end
