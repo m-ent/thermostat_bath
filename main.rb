@@ -15,7 +15,7 @@ class Thermo_controller
     case mode
     when :on
       @log = true
-    else :on
+    else
       @log = false
     end
   end
@@ -25,13 +25,18 @@ class Thermo_controller
     when :on
       @on_fly = true
       system("gpioctl -c 18 OUT")
-    else :on
+    else
       @on_fly = false
     end
   end
 
   def get_temp
-    /.+: (\d+\.\d+)/.match(`sysctl dev.ow_temp.0.temperature`)[1]
+    case @on_fly
+    when true
+      /.+: (\d+\.\d+)/.match(`sysctl dev.ow_temp.0.temperature`)[1].to_f
+    else
+      0.0
+    end
   end
 
   def calc_power(temp0, temp1)

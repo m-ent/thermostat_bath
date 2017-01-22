@@ -131,5 +131,39 @@ p condition
       end
     end
   end
+
+  describe '#on_fly' do
+    describe 'on_fly モードではない場合' do
+      before do
+        @controller = Thermo_controller.new
+        @controller.on_fly(:off)
+      end
+
+      it '#get_temp が 0.0 を返すこと' do
+        @controller.get_temp.must_equal 0.0
+      end
+    end
+
+    describe 'on_fly モードの場合' do
+      before do
+        @controller = Thermo_controller.new
+        @controller.on_fly(:on)
+      end
+
+      it '#get_temp が例外を返すこと' do
+        assert_raises NoMethodError do
+          @controller.get_temp
+        end
+      end
+
+      it '#power により gpio 関連のエラーが出ること' do
+        out, err = capture_subprocess_io do
+          @controller.power(:on, 1)
+        end
+
+        err.must_match /gpio/
+      end
+    end
+  end
 end
 
