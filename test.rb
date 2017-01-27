@@ -68,6 +68,12 @@ describe Thermo_controller do
         (subject.calc_power(34.0, 32.0) > p).must_equal true
       end
     end
+
+    subject { Thermo_controller.new(36.0, 10.0, 1.0, 1, 0) }
+    it '現在の温度が目標値以上の時、出力が0になること' do
+      subject.calc_power(30.0, 33.0)
+      subject.calc_power(33.0, 36.0).must_equal 0
+    end
   end
 
   describe '#log' do

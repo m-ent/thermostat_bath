@@ -47,7 +47,7 @@ class Thermo_controller
       # d(@temp-t)/dt = ((@temp - t1) - (@temp - t0)) / @interval
       #               = (-t1 + t0) / @interval 
 #    puts "P: #{p}, I: #{i}, D: #{d}:: total: #{p+i+d}"
-    return (p + i + d)
+    return temp1 < @target ? (p + i + d) : 0
   end 
 
   def power(state, time)
