@@ -40,7 +40,7 @@ class Thermo_controller
   end
 
   def calc_power(temp0, temp1)
-    p = @kp * (@target - temp1)/@target
+    p = @kp * (@target - temp1)
     @i_data += @interval * ((@target - temp0) + (@target - temp1))/2
     i = @ki * @i_data
     d = @kd * (temp0 - temp1) / @interval
