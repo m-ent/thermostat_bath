@@ -90,6 +90,7 @@ class Thermo_controller
     end
     loop do
       temp1 = get_temp
+      temp1 /= 2 if temp1 > temp0 * 1.67
       puts temp1
       break if condition == :temp and temp1 > ref_value
       if @log
