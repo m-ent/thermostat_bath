@@ -69,7 +69,19 @@ class Thermo_controller
   end
 
   def start(cycle = -1)
+    self.exec({condition: :cycle, ref_value: cycle})
+  end
+
+  def off_when_temp_become(temp)
+    self.exec({condition: :temp, ref_value: temp})
+  end
+
+  def exec(setting)
+    condition = setting[:condition]
+    ref_value = setting[:ref_value]
     temp0 = get_temp
+    temp1 = 0.0
+    cycle = 0
     sleep @interval
     if @log
       File.open(@log_file, 'w') do |f|
@@ -79,6 +91,7 @@ class Thermo_controller
     loop do
       temp1 = get_temp
       puts temp1
+      break if condition == :temp and temp1 > ref_value
       if @log
         File.open(@log_file, 'a') do |f|
           f.puts temp1 if @log
@@ -86,8 +99,10 @@ class Thermo_controller
       end
       put_power(calc_power(temp0, temp1))
       temp0 = temp1
-      cycle = (cycle < 0 ? -1 : cycle - 1)
-      break if cycle == 0
+      cycle += 1
+      break if condition == :cycle and \
+        (cycle >= ref_value and ref_value >= 0)
     end
+    return {temp: temp1, cycle: cycle}
   end
 end
