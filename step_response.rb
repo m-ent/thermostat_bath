@@ -1,6 +1,6 @@
 # PID tuning using step response
 # https://ja.wikipedia.org/wiki/PID%E5%88%B6%E5%BE%A1
-require './main'
+require './controller'
 
 temps = Array.new
 highest = 0.0

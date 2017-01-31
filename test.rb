@@ -1,5 +1,5 @@
 require 'minitest/autorun'
-require './main'
+require './controller'
 
 class Mock_temp
   attr_reader :temp_list

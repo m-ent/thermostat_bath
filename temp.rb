@@ -1,4 +1,4 @@
-require './main'
+require './controller'
 
 c = Thermo_controller.new
 c.on_fly(:on)
