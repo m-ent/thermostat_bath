@@ -72,7 +72,7 @@ class Thermo_controller
     self.exec({condition: :cycle, ref_value: cycle})
   end
 
-  def off_when_temp_become(temp)
+  def run_until_temp_become(temp)
     self.exec({condition: :temp, ref_value: temp})
   end
 

@@ -172,12 +172,12 @@ p condition
     end
   end
 
-  describe '#off_when_temp_become' do
+  describe '#run_until_temp_become' do
     it '指定の温度になったらサイクルが中断すること' do
       controller = Thermo_controller.new(36.0, 1.0) 
       mock_temp = Mock_temp.new
       controller.stub(:get_temp, mock_temp) do
-        result = controller.off_when_temp_become(32.5)
+        result = controller.run_until_temp_become(32.5)
         result[:temp].must_equal 33.0
         result[:cycle].must_equal 2
       end
