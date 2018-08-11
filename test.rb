@@ -100,7 +100,6 @@ describe Thermo_controller do
         @controller.start(5)
         condition = \
           "target: #{@tmp}, interval: #{@interval}, Kp: #{@kp}, Ki: #{@ki}, Kd: #{@kd}" 
-p condition
         log = ""
         File.open(@log_file) do |f|
           log = f.gets.chomp
@@ -180,6 +179,39 @@ p condition
         result = controller.run_until_temp_become(32.5)
         result[:temp].must_equal 33.0
         result[:cycle].must_equal 2
+      end
+    end
+  end
+
+  describe '#status_file' do
+    before do
+      @tmp, @interval, @kp, @ki, @kd = 36.0, 1.0, 1.0, 0.1, 0.01
+      @controller = Thermo_controller.new(@tmp, @interval, @kp, @ki, @kd)
+      @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
+      while File.exists?(@stat_file)
+        @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
+      end
+      @mock_temp = Mock_temp.new {}
+    end
+
+    it '指定のstatus記録ファイルが作成されること' do
+      @controller.stub(:get_temp, @mock_temp) do
+        @controller.status_file(@stat_file)
+        @controller.start(1)
+        File.exists?(@stat_file).must_equal true
+        File::Stat.new(@stat_file).size.wont_equal 0
+      end
+    end
+
+    it 'status記録ファイルに実行状態、温度、目標温度が記録されていること' do
+      @controller.stub(:get_temp, @mock_temp) do
+        @controller.status_file(@stat_file)
+        @controller.start(2)
+        File.exists?(@stat_file).must_equal true
+        File.open(@stat_file) do |f|
+          l = f.gets
+          l.must_match /going,.*32.0.*#{@tmp}/ # expecting "going, 32.0, 36.0"
+        end
       end
     end
   end

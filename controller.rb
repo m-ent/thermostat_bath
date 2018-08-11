@@ -2,6 +2,8 @@ class Thermo_controller
   def initialize(temp = 36.0, interval = 10.0, kp = 0.0, ki = 0.0, kd = 0.0)
     @log = false
     @log_file = 'temp.log'
+    @status = false
+    @status_file = ''
     @on_fly = false
     @target = temp
     @interval = interval # 測定間隔
@@ -18,6 +20,11 @@ class Thermo_controller
     else
       @log = false
     end
+  end
+
+  def status_file(status_file)
+    @status = true
+    @status_file = status_file
   end
 
   def on_fly(mode)
@@ -82,6 +89,9 @@ class Thermo_controller
     temp0 = get_temp
     temp1 = 0.0
     cycle = 0
+    Dir.glob('/tmp/thermobath_*') do |f|
+      File.delete(f)
+    end
     sleep @interval
     if @log
       File.open(@log_file, 'w') do |f|
@@ -101,6 +111,11 @@ class Thermo_controller
       end
       put_power(calc_power(temp0, temp1))
       temp0 = temp1
+      if @status
+        File.open(@status_file, 'w') do |f|
+          f.puts "going, #{temp1}, #{@target}"
+        end
+      end
       cycle += 1
       break if condition == :cycle and \
         (cycle >= ref_value and ref_value >= 0)
