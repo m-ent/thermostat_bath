@@ -106,7 +106,6 @@ describe Thermo_controller do
         end
         log.must_equal condition
       end
-
     end
 
     it 'log を on にすると log ファイルに温度が記録されること' do
@@ -165,7 +164,6 @@ describe Thermo_controller do
         out, err = capture_subprocess_io do
           @controller.power(:on, 1)
         end
-
         err.must_match /gpio/
       end
     end
@@ -192,6 +190,10 @@ describe Thermo_controller do
         @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
       end
       @mock_temp = Mock_temp.new {}
+      @direction_file = "./direction.dat"
+      File.open(@direction_file, 'w') do |f|
+        f.puts 'go'
+      end
     end
 
     it '指定のstatus記録ファイルが作成されること' do
@@ -213,6 +215,78 @@ describe Thermo_controller do
           l.must_match /going,.*32.0.*#{@tmp}/ # expecting "going, 32.0, 36.0"
         end
       end
+    end
+
+    after do
+      File.delete(@direction_file) if File.exists?(@direction_file)
+    end
+  end
+
+  describe 'about direction_file' do
+    before do
+      @tmp, @interval, @kp, @ki, @kd = 36.0, 1.0, 1.0, 0.1, 0.01
+      @controller = Thermo_controller.new(@tmp, @interval, @kp, @ki, @kd)
+      @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
+      while File.exists?(@stat_file)
+        @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
+      end
+      @mock_temp = Mock_temp.new {}
+      @direction_file = "./direction.dat"
+      File.open(@direction_file, 'w') do |f|
+        f.puts 'go'
+      end
+    end
+
+    it 'direction file が stop の場合、statusが idle であること' do
+      File.open(@direction_file, 'w') do |f|
+        f.puts 'stop'
+      end
+      @controller.stub(:get_temp, @mock_temp) do
+        @controller.status_file(@stat_file)
+        @controller.start(1)
+        File.exists?(@stat_file).must_equal true
+        File.open(@stat_file) do |f|
+          l = f.gets
+          l.must_match /idle,.*#{@tmp}/ # expecting "idle, ..., 36.0"
+        end
+      end
+    end
+
+    it '別の thread で controller を動かして、stat file が作られること' do
+      @controller.on_fly(:off)
+      th = Thread.new do
+        @controller.status_file(@stat_file)
+        @controller.start(1)
+      end
+      sleep 3
+      File.exists?(@stat_file).must_equal true
+    end
+
+    it 'direction_file がサイクルの途中で stop に変わったら、statusが idle に変わること' do
+      th = Thread.new do
+        @controller.stub(:get_temp, @mock_temp) do
+          @controller.status_file(@stat_file)
+          @controller.start(5)
+        end
+      end
+      sleep 3
+      File.exists?(@stat_file).must_equal true
+      File.open(@stat_file) do |f|
+        l = f.gets
+        l.must_match /going,.*#{@tmp}/ # expecting "going, ..., 36.0"
+      end
+      File.open(@direction_file, 'w') do |f|
+        f.puts 'stop'
+      end
+      sleep 3
+      File.open(@stat_file) do |f|
+        l = f.gets
+        l.must_match /idle,.*#{@tmp}/ # expecting "idle, ..., 36.0"
+      end
+    end
+
+    after do
+      File.delete(@direction_file) if File.exists?(@direction_file)
     end
   end
 end

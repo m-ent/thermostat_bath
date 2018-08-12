@@ -4,6 +4,7 @@ class Thermo_controller
     @log_file = 'temp.log'
     @status = false
     @status_file = ''
+    @direction_file = './direction.dat'
     @on_fly = false
     @target = temp
     @interval = interval # 測定間隔
@@ -99,21 +100,30 @@ class Thermo_controller
       end
     end
     loop do
+      @idle = false
+      if File.exists?(@direction_file)
+        File.open(@direction_file) do |f|
+          if f.gets =~ /stop/
+            @idle = true
+          end
+        end
+      end
       temp1 = get_temp
 #      temp1 = temp0 if temp1 > temp0 * 1.75
 #      temp1 = temp0 if temp1 < temp0 * 0.5
-      puts temp1
+#      puts temp1
       break if condition == :temp and temp1 > ref_value
       if @log
         File.open(@log_file, 'a') do |f|
           f.puts temp1 if @log
         end
       end
-      put_power(calc_power(temp0, temp1))
+      put_power(calc_power(temp0, temp1)) if not @idle
       temp0 = temp1
       if @status
         File.open(@status_file, 'w') do |f|
-          f.puts "going, #{temp1}, #{@target}"
+          state = (@idle ? 'idle' : 'going')
+          f.puts "#{state}, #{temp1}, #{@target}"
         end
       end
       cycle += 1
