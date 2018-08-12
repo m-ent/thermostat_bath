@@ -2,7 +2,9 @@
 # A sample Gemfile
 source "https://rubygems.org"
 
-# gem "rails"
+gem "sinatra"
+gem "sinatra-contrib"
+
 group :test, :development do
   gem 'rack-test'
   gem 'minitest'
