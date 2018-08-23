@@ -190,7 +190,7 @@ describe Thermo_controller do
         @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
       end
       @mock_temp = Mock_temp.new {}
-      @direction_file = "./direction.dat"
+      @direction_file = "/tmp/direction.dat"
       File.open(@direction_file, 'w') do |f|
         f.puts 'go'
       end
@@ -231,7 +231,7 @@ describe Thermo_controller do
         @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
       end
       @mock_temp = Mock_temp.new {}
-      @direction_file = "./direction.dat"
+      @direction_file = "/tmp/direction.dat"
       File.open(@direction_file, 'w') do |f|
         f.puts 'go'
       end

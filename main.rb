@@ -24,17 +24,34 @@ get '/get_status' do
   {status: @status, temp: @temp, target: @target}.to_json
 end
 
+put '/set_direction/:state' do
+  @direction_file = '/tmp/direction.dat'
+  case params['state']
+  when 'stop'
+    direction = "stop"
+  else
+    direction = "go"
+  end
+  File.open(@direction_file, 'w') do |f|
+    f.puts(direction) 
+  end
+end
+
 __END__
 
 @@index
 <head> <title>Thermostat bath controller</title> </head>
 <body>
-  <p class="radio_area">稼動状態: 
+  <p>
+    稼動状態: <span id="status"> </span>
+    / 温度: <span id="temp"> </span>
+    / 目標温度: <span id="target"> </span>
+  </p>
+  <p class="radio_area">状態変更: 
     <input type="radio" name="state" value="1" checked="checked">稼働
     <input type="radio" name="state" value="0">停止
   <input id="change_state_btn" type="button" value="変更">
   </p>
-  <p id="report_place"> </p>
 
   <script type='text/javascript' src='jquery-3.3.1.min.js'></script>
 
@@ -52,11 +69,19 @@ __END__
           url: "/get_status",
           dataType: "json",
           success: function(json) {
-            // some_procedures;
-            //$('#report_place').text(json.element);
+            $('#status').text(json.status);
+            $('#temp').text(json.temp);
+            $('#target').text(json.target);
+            if (json.status == 'Going'){
+              $("input[name='state']").val(["1"]);
+            } else {
+              $("input[name='state']").val(["0"]);
+            };
           },
           error: function() {
-            // error_handling;
+            $('#status').text('Error');
+            $('#temp').text('---');
+            $('#target').text('---');
           }
         });
       }
@@ -64,10 +89,17 @@ __END__
       $("#change_state_btn").click(function(){
         var change_val = $('input[name=state]:checked').val();
         console.log(change_val); //=>0
-
-        $.post('/post', {state: change_val})
-
-        // some_procedures;
+        if (change_val == 0){
+          $.ajax({
+            url: '/set_direction/stop',
+            type: 'PUT',
+          });
+        } else {
+          $.ajax({
+            url: '/set_direction/go',
+            type: 'PUT',
+          });
+        }
       });
     });
 

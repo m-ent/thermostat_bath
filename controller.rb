@@ -4,7 +4,7 @@ class Thermo_controller
     @log_file = 'temp.log'
     @status = false
     @status_file = ''
-    @direction_file = './direction.dat'
+    @direction_file = '/tmp/direction.dat'
     @on_fly = false
     @target = temp
     @interval = interval # 測定間隔
