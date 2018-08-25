@@ -3,8 +3,20 @@ require 'sinatra/reloader'
 require 'json'
 require './controller'
 
+Target = 38.0
+
 th = Thread.new do
-  # thermobath controller settings here
+  c = Thermo_controller.new(Target, 10, 0.098)
+#  c.on_fly(:on)
+  c.run_until_temp_become(Target * 0.5)
+  sleep 150
+  c.run_until_temp_become(Target * 0.75)
+  sleep 150
+
+  c = Thermo_controller.new(Target, 10, 0.098, 0.000567, 4.234)
+  c.log(:on)
+#  c.on_fly(:on)
+  c.start
 end
 
 get '/' do
@@ -72,7 +84,7 @@ __END__
             $('#status').text(json.status);
             $('#temp').text(json.temp);
             $('#target').text(json.target);
-            if (json.status == 'Going'){
+            if (json.status == 'going'){
               $("input[name='state']").val(["1"]);
             } else {
               $("input[name='state']").val(["0"]);

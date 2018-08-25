@@ -80,7 +80,7 @@ describe Thermo_controller do
     before do
       @tmp, @interval, @kp, @ki, @kd = 36.0, 1.0, 1.0, 0.1, 0.01
       @controller = Thermo_controller.new(@tmp, @interval, @kp, @ki, @kd)
-      @log_file = 'temp.log'
+      @log_file = '/tmp/temp.log'
       File.delete(@log_file) if File.exists?(@log_file)
       @mock_temp = Mock_temp.new {}
     end
@@ -185,10 +185,7 @@ describe Thermo_controller do
     before do
       @tmp, @interval, @kp, @ki, @kd = 36.0, 1.0, 1.0, 0.1, 0.01
       @controller = Thermo_controller.new(@tmp, @interval, @kp, @ki, @kd)
-      @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
-      while File.exists?(@stat_file)
-        @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
-      end
+      @stat_file = "/tmp/thermobath_stat.dat"
       @mock_temp = Mock_temp.new {}
       @direction_file = "/tmp/direction.dat"
       File.open(@direction_file, 'w') do |f|
@@ -198,7 +195,6 @@ describe Thermo_controller do
 
     it '指定のstatus記録ファイルが作成されること' do
       @controller.stub(:get_temp, @mock_temp) do
-        @controller.status_file(@stat_file)
         @controller.start(1)
         File.exists?(@stat_file).must_equal true
         File::Stat.new(@stat_file).size.wont_equal 0
@@ -207,7 +203,6 @@ describe Thermo_controller do
 
     it 'status記録ファイルに実行状態、温度、目標温度が記録されていること' do
       @controller.stub(:get_temp, @mock_temp) do
-        @controller.status_file(@stat_file)
         @controller.start(2)
         File.exists?(@stat_file).must_equal true
         File.open(@stat_file) do |f|
@@ -226,10 +221,7 @@ describe Thermo_controller do
     before do
       @tmp, @interval, @kp, @ki, @kd = 36.0, 1.0, 1.0, 0.1, 0.01
       @controller = Thermo_controller.new(@tmp, @interval, @kp, @ki, @kd)
-      @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
-      while File.exists?(@stat_file)
-        @stat_file = "/tmp/thermobath_#{Time.now.strftime("%6N")}.dat"
-      end
+      @stat_file = "/tmp/thermobath_stat.dat"
       @mock_temp = Mock_temp.new {}
       @direction_file = "/tmp/direction.dat"
       File.open(@direction_file, 'w') do |f|
@@ -242,7 +234,6 @@ describe Thermo_controller do
         f.puts 'stop'
       end
       @controller.stub(:get_temp, @mock_temp) do
-        @controller.status_file(@stat_file)
         @controller.start(1)
         File.exists?(@stat_file).must_equal true
         File.open(@stat_file) do |f|
@@ -255,7 +246,6 @@ describe Thermo_controller do
     it '別の thread で controller を動かして、stat file が作られること' do
       @controller.on_fly(:off)
       th = Thread.new do
-        @controller.status_file(@stat_file)
         @controller.start(1)
       end
       sleep 3
@@ -265,7 +255,6 @@ describe Thermo_controller do
     it 'direction_file がサイクルの途中で stop に変わったら、statusが idle に変わること' do
       th = Thread.new do
         @controller.stub(:get_temp, @mock_temp) do
-          @controller.status_file(@stat_file)
           @controller.start(5)
         end
       end

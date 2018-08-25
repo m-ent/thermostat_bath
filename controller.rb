@@ -1,9 +1,9 @@
 class Thermo_controller
   def initialize(temp = 36.0, interval = 10.0, kp = 0.0, ki = 0.0, kd = 0.0)
     @log = false
-    @log_file = 'temp.log'
-    @status = false
-    @status_file = ''
+    @log_file = '/tmp/temp.log'
+    @status = true
+    @status_file = '/tmp/thermobath_stat.dat'
     @direction_file = '/tmp/direction.dat'
     @on_fly = false
     @target = temp
@@ -21,11 +21,6 @@ class Thermo_controller
     else
       @log = false
     end
-  end
-
-  def status_file(status_file)
-    @status = true
-    @status_file = status_file
   end
 
   def on_fly(mode)
@@ -90,15 +85,17 @@ class Thermo_controller
     temp0 = get_temp
     temp1 = 0.0
     cycle = 0
-    Dir.glob('/tmp/thermobath_*') do |f|
-      File.delete(f)
-    end
-    sleep @interval
     if @log
       File.open(@log_file, 'w') do |f|
         f.puts "target: #{@target}, interval: #{@interval}, Kp: #{@kp}, Ki: #{@ki}, Kd: #{@kd}"
       end
     end
+    if @status
+      File.open(@status_file, 'w') do |f|
+        f.puts ", , "
+      end
+    end
+    sleep @interval
     loop do
       @idle = false
       if File.exists?(@direction_file)
