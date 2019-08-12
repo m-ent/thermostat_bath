@@ -30,7 +30,7 @@ get '/get_status' do
     if m = /(.+),\w*(.+),\w*(.+)/.match(l)
       @status, @temp, @target = m[1], m[2], m[3]
     else
-      @status, @temp, @target = 'error', 'error' 'error'
+      @status, @temp, @target = 'error', 'error', 'error'
     end
   end
   {status: @status, temp: @temp, target: @target}.to_json
@@ -70,7 +70,7 @@ __END__
   <script type="text/javascript">
     $(function(){
       function startTimer(){
-        timer = setInterval(exec, 2000); // 2000ms毎に exec() を実行する
+        timer = setInterval(exec, 5000); // 5000ms毎に exec() を実行する
       }                                  // その情報をtimer変数へ入れている。
 
       startTimer(); //タイマー開始
