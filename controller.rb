@@ -6,6 +6,7 @@ class Thermo_controller
     @status_file = '/tmp/thermobath_stat.dat'
     @direction_file = '/tmp/direction.dat'
     @on_fly = false
+    @verbous = false # for debug: show temperature each cycle in console
     @target = temp
     @interval = interval # 測定間隔
     @kp = kp # Kp: 比例制御係数
@@ -120,6 +121,7 @@ class Thermo_controller
         end
       end
       temp1 = get_temp
+      puts temp1 if @verbous
 #      temp1 = temp0 if temp1 > temp0 * 1.75
 #      temp1 = temp0 if temp1 < temp0 * 0.5
 #      puts temp1
