@@ -36,10 +36,24 @@ class Thermo_controller
   def get_temp
     case @on_fly
     when true
-      /.+: (\d+\.\d+)/.match(`sysctl dev.ow_temp.0.temperature`)[1].to_f
+      t = /.+: (\d+\.\d+)/.match(`sysctl dev.ow_temp.0.temperature`)[1].to_f
+      1.24 * t - 7.37
     else
       0.0
     end
+    # calibration by data below
+    # x:1-wire DS18B20 y:analog thermometer / y = 1.24 x - 7.37
+    # 19.750 16
+    # 22.562 20
+    # 26.375 25
+    # 29.937 30
+    # 30.125 33
+    # 33.937 35
+    # 37.875 40
+    # 42.187 45
+    # 46.000 50
+    # 50.437 55
+    # 53.812 59
   end
 
   def calc_power(temp0, temp1)
