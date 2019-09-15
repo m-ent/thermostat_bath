@@ -4,7 +4,7 @@ require 'minitest/autorun'
 require 'minitest/reporters'
 Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
 require 'rack/test'
-require './reporter'
+require './simple_run'
 
 include Rack::Test::Methods
 
