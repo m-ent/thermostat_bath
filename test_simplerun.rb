@@ -26,7 +26,7 @@ describe "Thermobath reporter" do
         @stat_file = "/tmp/thermobath_status.dat"
         @temp = 30.0 + rand(100) / 10.0
         File.open(@stat_file, 'w') do |f|
-          f.puts "#{@temp}, 36.0" # temperature, target temp
+          f.puts "---, #{@temp}, 36.0" # (go/idle), temperature, target temp
         end
         get '/get_status'
         @response = last_response
@@ -83,7 +83,7 @@ describe "Thermobath reporter" do
         @stat_file = "/tmp/thermobath_status.dat"
         @temp = 30.0 + rand(100) / 10.0
         File.open(@stat_file, 'w') do |f|
-          f.puts "#{@temp}, 36.0" # temperature, target temp
+          f.puts "---, #{@temp}, 36.0" # (go/idle), temperature, target temp
         end
       end
 
