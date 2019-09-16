@@ -2,6 +2,7 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'json'
 require './controller'
+set :bind, '0.0.0.0'
 
 target = ARGV.shift
 case target
