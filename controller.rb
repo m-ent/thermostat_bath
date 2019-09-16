@@ -3,7 +3,7 @@ class Thermo_controller
     @log = false
     @log_file = '/tmp/temp.log'
     @status = true
-    @status_file = '/tmp/thermobath_stat.dat'
+    @status_file = '/tmp/thermobath_status.dat'
     @direction_file = '/tmp/direction.dat'
     @on_fly = false
     @verbous = false # for debug: show temperature each cycle in console
@@ -102,7 +102,7 @@ class Thermo_controller
     end
     if @status
       File.open(@status_file, 'w') do |f|
-        f.puts ", , "
+        f.puts ",,"
       end
     end
     sleep @interval
@@ -131,7 +131,7 @@ class Thermo_controller
       if @status
         File.open(@status_file, 'w') do |f|
           state = (@idle ? 'idle' : 'going')
-          f.puts "#{state}, #{temp1}, #{@target}"
+          f.puts "#{state},#{temp1.round(1)}, #{@target.round(1)}"
         end
       end
       cycle += 1

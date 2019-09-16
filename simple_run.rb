@@ -3,7 +3,13 @@ require 'sinatra/reloader'
 require 'json'
 require './controller'
 
-temp = (ARGV.shift || "38.0").to_f
+target = ARGV.shift
+case target
+when /\d+\.?\d*/
+else
+  target = 38.0
+end
+temp = target.to_f
 coefficient = 0.95
 resting_time = 30 #[sec]
 
@@ -66,8 +72,8 @@ get '/get_status' do
     if  (Time.now - File::Stat.new(@stat_file).mtime) < 30 * 60 
       File.open(@stat_file) do |f|
         l = f.gets
-        if m = /(.+),\s*(.+)/.match(l)
-          @temp, @target = m[1], m[2]
+        if m = /(.+),\s*(.+),\s*(.+)/.match(l)
+          @temp, @target = m[2], m[3]
         end
       end
     end
@@ -81,8 +87,8 @@ __END__
 <head> <title>Thermostat bath status report</title> </head>
 <body>
   <p>
-    現在温度: <span id="temp"> </span>
-    (目標温度: <span id="target"> </span>)
+    現在温度: <span id="temp"> </span> ℃
+    (目標温度: <span id="target"> </span> ℃): @<span id="time"> </span>
   </p>
 
   <script type='text/javascript' src='jquery-3.3.1.min.js'></script>
@@ -90,7 +96,7 @@ __END__
   <script type="text/javascript">
     $(function(){
       function startTimer(){
-        timer = setInterval(exec, 1000); // 1000ms毎に exec() を実行する
+        timer = setInterval(exec, 5000); // 5000ms毎に exec() を実行する
       }                                  // その情報をtimer変数へ入れている。
 
       startTimer(); //タイマー開始
@@ -109,6 +115,7 @@ __END__
             $('#target').text('---');
           }
         });
+        $('#time').text((new Date()).getHours() + ":" + (new Date()).getMinutes() + ":" + (new Date()).getSeconds());
       }
     });
 

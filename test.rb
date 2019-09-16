@@ -187,7 +187,7 @@ describe Thermo_controller do
     before do
       @tmp, @interval, @kp, @ki, @kd = 36.0, 1.0, 1.0, 0.1, 0.01
       @controller = Thermo_controller.new(@tmp, @interval, @kp, @ki, @kd)
-      @stat_file = "/tmp/thermobath_stat.dat"
+      @stat_file = "/tmp/thermobath_status.dat"
       @mock_temp = Mock_temp.new {}
       @direction_file = "/tmp/direction.dat"
       File.open(@direction_file, 'w') do |f|
@@ -223,7 +223,7 @@ describe Thermo_controller do
     before do
       @tmp, @interval, @kp, @ki, @kd = 36.0, 1.0, 1.0, 0.1, 0.01
       @controller = Thermo_controller.new(@tmp, @interval, @kp, @ki, @kd)
-      @stat_file = "/tmp/thermobath_stat.dat"
+      @stat_file = "/tmp/thermobath_status.dat"
       @mock_temp = Mock_temp.new {}
       @direction_file = "/tmp/direction.dat"
       File.open(@direction_file, 'w') do |f|
