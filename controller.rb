@@ -38,18 +38,42 @@ class Thermo_controller
     case @on_fly
     when true
       t = /.+: (\d+\.\d+)/.match(`sysctl dev.ow_temp.0.temperature`)[1].to_f
-      1.20 * t - 7.04
+      1.05 * t - 2.04
     else
       0.0
     end
     # calibration by data below (retake for device renewal)
-    # x:1-wire DS18B20 y:analog thermometer / y = 1.20 x - 7.04
-    # 33.363 33
-    # 34.169 34
-    # 34.976 35 
-    # 35.782 35.9
-    # 36.589 37
-    # 37.395 37.8
+    # x:1-wire DS18B20 y:analog thermometer / y = 1.05 x - 2.04
+    # 53.437  54
+    # 52.25   53
+    # 51.062  52
+    # 50.25   51
+    # 49.187  50
+    # 48.187  49
+    # 47.312  48
+    # 46.5    47
+    # 45.562  46
+    # 44.562  45
+    # 43.687  44
+    # 42.687  43
+    # 41.937  42
+    # 41      41
+    # 39.937  40
+    # 39.062  39
+    # 38      38
+    # 37.062  37
+    # 36.25   36
+    # 35.25   35
+    # 34      34
+    # 33      33
+    # 32.062  32
+    # 31.187  31
+    # 30.187  30
+    # 29.375  29
+    # 28.437  28
+    # 27.562  27
+    # 26.812  26
+    # 25.812  25
   end
 
   def calc_power(temp0, temp1)
@@ -96,8 +120,8 @@ class Thermo_controller
     temp1 = 0.0
     cycle = 0
     if @log
-      File.open(@log_file, 'w') do |f|
-        f.puts "target: #{@target}, interval: #{@interval}, Kp: #{@kp}, Ki: #{@ki}, Kd: #{@kd}"
+      File.open(@log_file, 'a') do |f|
+        f.puts "=====\ntarget: #{@target}, interval: #{@interval}, Kp: #{@kp}, Ki: #{@ki}, Kd: #{@kd}"
       end
     end
     if @status
@@ -123,7 +147,7 @@ class Thermo_controller
       break if condition == :temp and temp1 > ref_value
       if @log
         File.open(@log_file, 'a') do |f|
-          f.puts temp1 if @log
+          f.puts "#{temp1} #{Time.now.strftime("%H%M%S")}" if @log
         end
       end
       put_power(calc_power(temp0, temp1)) if not @idle
