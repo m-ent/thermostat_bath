@@ -37,8 +37,10 @@ class Thermo_controller
   def get_temp
     case @on_fly
     when true
-      t = /.+: (\d+\.\d+)/.match(`sysctl dev.ow_temp.0.temperature`)[1].to_f
-      1.05 * t - 2.04
+      ow_temp = 0.0
+      until (ow_temp = /.+: (\d+\.\d+)/.match(`sysctl dev.ow_temp.0.temperature`))
+      end
+      1.05 * ow_temp[1].to_f - 2.04
     else
       0.0
     end
