@@ -34,11 +34,15 @@ class Thermo_controller
     end
   end
 
+  def call_onewire
+    `sysctl dev.ow_temp.0.temperature`
+  end
+
   def get_temp
     case @on_fly
     when true
       ow_temp = 0.0
-      until (ow_temp = /.+: (\d+\.\d+)/.match(`sysctl dev.ow_temp.0.temperature`))
+      until (ow_temp = /.+: (-?\d+\.\d+)/.match(call_onewire))
       end
       1.05 * ow_temp[1].to_f - 2.04
     else

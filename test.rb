@@ -23,6 +23,16 @@ class Mock_temp
   end
 end
 
+class Mock_onewire
+  def initialize(temperature)
+    @temp = temperature
+  end
+
+  def call
+    "sysctl: #{@temp}"
+  end
+end
+
 describe Thermo_controller do
   describe '#get_temp' do
     subject { Thermo_controller.new }
@@ -105,8 +115,9 @@ describe Thermo_controller do
         log = ""
         File.open(@log_file) do |f|
           log = f.gets.chomp
+          log += f.gets.chomp
         end
-        log.must_equal condition
+        log.must_include condition
       end
     end
 
@@ -156,9 +167,10 @@ describe Thermo_controller do
         @controller.on_fly(:on)
       end
 
-      it '#get_temp が例外を返すこと' do
-        assert_raises NoMethodError do
-          @controller.get_temp
+      it '#get_temp が 0.0 を返さないこと' do
+        mock_onewire = Mock_onewire.new('38.0')
+        @controller.stub(:call_onewire, mock_onewire) do
+          @controller.get_temp.wont_equal 0.0
         end
       end
 
