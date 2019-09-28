@@ -14,50 +14,65 @@ temp = target.to_f
 coefficient = 0.95
 resting_time = 30 #[sec]
 
+def get_state
+  File.open('/tmp/direction.dat') do |f|
+    f.gets.chomp
+  end
+end
+
 def rest(t)
+  return if get_state == 'stop'
   puts "rest for #{t} second."
   sleep t
 end
 
 th = Thread.new do # 別スレッドで PID 制御を実行
-  c = Thermo_controller.new(temp, 10, 0.098, 0.000567, 4.234)
-  c.on_fly(:on)
-  t0 = c.get_temp
-  t0 = 0.1 if t0 <= 0
-  puts "start: #{t0} to #{temp} [degree]."
-  puts "----------------"
-  t = t0
-  i = 0
-  while t < temp * coefficient do
-    i += 1
-    t /= coefficient
-  end 
+  loop do
+    case get_state
+    when 'stop'
+      # do nothing
+    when /^\d+\.?\d*$/
 
-  puts "step = #{i}"
-  skip_last_step = false
+      c = Thermo_controller.new(temp, 10, 0.098, 0.000567, 4.234)
+      c.on_fly(:on)
+      t0 = c.get_temp
+      t0 = 0.1 if t0 <= 0
+      puts "start: #{t0} to #{temp} [degree]."
+      puts "----------------"
+      t = t0
+      i = 0
+      while t < temp * coefficient do
+        i += 1
+        t /= coefficient
+      end
 
-  i.times do |ii|
-    tt = temp * coefficient ** (i - ii)
-    puts "go to #{tt} degree"
-    c = Thermo_controller.new(tt, 10, 0.098, 0.000567, 4.234)
-    c.log(:on)
-    c.on_fly(:on)
-    if c.get_temp / tt > 0.95
-      puts "skiping"
-      skip_last_step = true
-      next
+      puts "step = #{i}"
+      skip_last_step = false
+
+      i.times do |ii|
+        tt = temp * coefficient ** (i - ii)
+        puts "go to #{tt} degree"
+        c = Thermo_controller.new(tt, 10, 0.098, 0.000567, 4.234)
+        c.log(:on)
+        c.on_fly(:on)
+        if c.get_temp / tt > 0.95
+          puts "skiping"
+          skip_last_step = true
+          next
+        end
+        skip_last_step = false
+        c.run_until_temp_become(tt)
+        rest(resting_time)
+      end
+
+      rest(resting_time) if skip_last_step
+      puts "now, start the maintainance cycle."
+      c = Thermo_controller.new(temp, 10, 0.098, 0.000567, 4.234)
+      c.log(:on)
+      c.on_fly(:on)
+      c.start
     end
-    skip_last_step = false
-    c.run_until_temp_become(tt)
-    rest(resting_time)
   end
-
-  rest(resting_time) if skip_last_step
-  puts "now, start the maintainance cycle."
-  c = Thermo_controller.new(temp, 10, 0.098, 0.000567, 4.234)
-  c.log(:on)
-  c.on_fly(:on)
-  c.start
 end
 
 # ここから sinatra の設定: 温度報告用

@@ -142,6 +142,7 @@ class Thermo_controller
         File.open(@direction_file) do |f|
           if f.gets =~ /stop/
             @idle = true
+            break
           end
         end
       end

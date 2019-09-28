@@ -239,8 +239,9 @@ describe Thermo_controller do
       @mock_temp = Mock_temp.new {}
       @direction_file = "/tmp/direction.dat"
       File.open(@direction_file, 'w') do |f|
-        f.puts 'go'
+        f.puts '38.0'
       end
+      @log_file = '/tmp/temp.log'
     end
 
     it 'direction file が stop の場合、statusが idle であること' do
@@ -286,6 +287,42 @@ describe Thermo_controller do
         l = f.gets
         l.must_match /idle,.*#{@tmp}/ # expecting "idle, ..., 36.0"
       end
+    end
+
+    it 'direction_file が不変の場合、サイクルが進むと log file が増えること' do
+      th = Thread.new do
+        @controller.log(:on)
+        @controller.stub(:get_temp, @mock_temp) do
+          @controller.start(5)
+        end
+      end
+      sleep 2
+      File.open(@direction_file, 'w') do |f|
+        f.puts '38.0'
+      end
+      sleep 2
+      size_pre = File.size(@log_file)
+      sleep 2
+      size_post = File.size(@log_file)
+      size_pre.wont_equal size_post
+    end
+
+    it 'direction_file がサイクルの途中で stop に変わったら、log fileが増えないこと' do
+      th = Thread.new do
+        @controller.log(:on)
+        @controller.stub(:get_temp, @mock_temp) do
+          @controller.start(5)
+        end
+      end
+      sleep 2
+      File.open(@direction_file, 'w') do |f|
+        f.puts 'stop'
+      end
+      sleep 2
+      size_pre = File.size(@log_file)
+      sleep 2
+      size_post = File.size(@log_file)
+      size_pre.must_equal size_post
     end
 
     after do
