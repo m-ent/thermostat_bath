@@ -168,6 +168,7 @@ class Thermo_controller
       cycle += 1
       break if condition == :cycle and \
         (cycle >= ref_value and ref_value >= 0)
+      break if @idle
     end
     return {temp: temp1, cycle: cycle}
   end
