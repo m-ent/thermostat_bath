@@ -89,12 +89,12 @@ get '/get_status' do
       File.open(@stat_file) do |f|
         l = f.gets
         if m = /(.+),\s*(.+),\s*(.+)/.match(l)
-          @temp, @target = m[2], m[3]
+          @state, @temp, @target = m[1], m[2], m[3]
         end
       end
     end
   end
-  {temp: @temp, target: @target}.to_json
+  {state: @state, temp: @temp, target: @target}.to_json
 end
 
 put '/set_direction/:state' do
@@ -124,6 +124,7 @@ __END__
     <input id="stop_btn" type="button" value="停止">
   <p>
   [Status]</br>
+    状態: <span id="state"> </span> 
     現在温度: <span id="temp"> </span> ℃
     (目標温度: <span id="target"> </span> ℃): @<span id="time"> </span>
   </p>
@@ -144,8 +145,15 @@ __END__
           url: "/get_status",
           dataType: "json",
           success: function(json) {
-            $('#temp').text(json.temp);
-            $('#target').text(json.target);
+            if (json.state == "going") {
+              $('#state').text("稼働中");
+              $('#temp').text(json.temp);
+              $('#target').text(json.target);
+            } else {
+              $('#state').text("休止中");
+              $('#temp').text("---");
+              $('#target').text("---");
+            }
           },
           error: function() {
             $('#temp').text('---');
