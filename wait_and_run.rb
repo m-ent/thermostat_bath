@@ -28,11 +28,11 @@ end
 
 th = Thread.new do # 別スレッドで PID 制御を実行
   loop do
-    case get_state
+    case (d = get_state)
     when 'stop'
       # do nothing
     else
-      temp = d if /^\d+\.?\d*$/.match(d)
+      temp = d.to_f if /^\d+\.?\d*$/.match(d)
       c = Thermo_controller.new(temp, 10, 0.098, 0.000567, 4.234)
       c.on_fly(:on)
       t0 = c.get_temp
