@@ -148,7 +148,7 @@ class Thermo_controller
       end
       temp1 = get_temp
       loop do
-        break if (temp1 - temp0).abs < 5.0 # 外れ値対策
+        break if (temp1 - temp0).abs < 2.5 # 外れ値対策
         temp1 = get_temp
       end
       puts temp1 if @verbous
